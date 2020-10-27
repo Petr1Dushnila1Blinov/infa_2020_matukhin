@@ -10,12 +10,11 @@ fr = tk.Frame(root)
 root.geometry('800x600')
 canv = tk.Canvas(root, bg='white')
 canv.pack(fill=tk.BOTH, expand=1)
-k = 0.01  # Вязкость среды
+k = 0.04  # Вязкость среды
 l = 0.7  # Восстановление энергии при ударе
-t = 0.002 # FPS
-g = 100
+t = 0.04 # FPS
+g = 10
 V = 2 # Скорость целей
-
 
 class ball():
     def __init__(self, x=40, y=450):
@@ -160,7 +159,7 @@ class target():
         y = self.y = rnd(300, 550)
         vy = self.vy = rnd(V,3*V)
         r = self.r = rnd(2, 50)
-        color = self.color = 'red'
+        color = self.color = 'yellow'
         canv.coords(self.id, x - r, y - r, x + r, y + r)
         canv.itemconfig(self.id, fill=color)
 
@@ -211,8 +210,6 @@ def new_game(event=''):
     global gun, t1,t2, screen1, balls, bullet
     t2.new_target()
     t1.new_target()
-    t1.points = 0
-    t2.points = 0
     bullet = 0
     balls = []
     canv.bind('<Button-1>', g1.fire2_start)
@@ -222,26 +219,28 @@ def new_game(event=''):
     t1.live = 1
     t2.live = 1
     while t1.live or t2.live or OK != 0:
-        canv.create_rectangle(0, 0, 60, 60, fill="white", outline="blue")
         t1.move()
         t2.move()
+        p = t1.points + t2.points
         for b in balls:
             b.move()
             if b.hittest(t1) and t1.live:
                 t1.live = 0
                 t1.hit()
+                canv.create_rectangle(0, 0, 60, 60, fill="white", outline="white")
                 canv.itemconfig(screen1, text='Вы уничтожили цель 1 за ' + str(bullet) + ' выстрелов')
+
             if b.hittest(t2) and t2.live:
                 t2.live = 0
                 t2.hit()
                 canv.itemconfig(screen1, text='Вы уничтожили цель 2 за ' + str(bullet) + ' выстрелов')
-                canv.create_text(30, 30, text=t1.points + t2.points, font='28')
-            canv.create_rectangle(0, 0, 60, 60, fill="white", outline="blue")
-            canv.create_text(30, 30, text=t1.points+t2.points, font='28')
+                canv.create_rectangle(0, 0, 60, 60, fill="white", outline="white")
+
             if t2.live == 0 and t1.live == 0:
                 canv.bind('<Button-1>', '')
                 canv.bind('<ButtonRelease-1>', '')
-
+        if t1.points + t2.points != p:
+            canv.create_text(30, 30, text=t1.points + t2.points, font='28')
         OK = 0
         for k in balls:
             if k.live != 0:
@@ -258,3 +257,4 @@ def new_game(event=''):
 
 new_game()
 mainloop()
+
